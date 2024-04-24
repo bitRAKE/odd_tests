@@ -17,7 +17,8 @@ for %%i in (n o p q r s t u v w x y z) do (
 
 link @response
 
-if errorlevel 0 (
+if %errorlevel% EQU 0 (
+	echo %errorlevel%
 	del merge.obj
 	FOR %%i IN (n o p q r s t u v w x y z) DO (
 		del merge.%%i
