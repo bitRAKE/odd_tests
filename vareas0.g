@@ -1,10 +1,11 @@
 N := 20
 lbytes = 0
 vbytes = 0
-repeat 1 shl N
+repeat 1 shl N ; could use $$ instead of A#%, throughout
 	A#%:
-	dd %
-	rb 1 shl 30
+	dd %			; literal data
+	rb 1 shl 30		; virtual data
+
 	lbytes = lbytes + $%% - A#%
 	vbytes = vbytes + $ - A#% - 4
 	section $%% ; new address area
