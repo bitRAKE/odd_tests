@@ -1,7 +1,0 @@
-/NODEFAULTLIB
-/DLL
-/SUBSYSTEM:WINDOWS,6.02
-/EXPORT:Add=?Add@@YAHHH@Z
-/EXPORT:Subtract=?Subtract@@YAHHH@Z
-kernel32.lib
-user32.lib

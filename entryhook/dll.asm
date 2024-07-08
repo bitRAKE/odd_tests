@@ -25,25 +25,26 @@ public _DllMainCRTStartup as '_DllMainCRTStartup' ; linker expects this default 
 	jnz @1F
 
 	enter .frame, 0
-	GetModuleHandleA A "ntdll"
+	GetModuleHandleA A "ntdll.dll"
 	xchg rcx, rax
 	GetProcAddress rcx, A "RtlUserThreadStart"
 	mov [original_RtlUserThreadStart], rax
 
-	lea rdx, [__ImageBase]
-	mov ecx, [rdx + IMAGE_DOS_HEADER.e_lfanew]
-	mov ecx, [rdx + rcx + IMAGE_OPTIONAL_HEADER64.AddressOfEntryPoint]
-	add rdx, rcx
+	GetModuleHandleA 0 ; process __ImageBase
+	mov ecx, [rax + IMAGE_DOS_HEADER.e_lfanew]
+	mov ecx, [rax + rcx + IMAGE_NT_HEADERS64.OptionalHeader.AddressOfEntryPoint]
+	add rax, rcx
 
-	mov ecx, 0x1000 ; search range
-@@:	cmp [rbp + rcx + CONTEXT.Rip], rax ; original_RtlUserThreadStart
+	mov rdx, [original_RtlUserThreadStart]
+	mov ecx, 0x180 ; search range
+@@:	cmp [rbp + rcx*8 + CONTEXT.Rip], rdx ; original_RtlUserThreadStart
 	jnz @9F
-	cmp [rbp + rcx + CONTEXT.Rcx], rdx ; entryPoint
+	cmp [rbp + rcx*8 + CONTEXT.Rcx], rax ; entryPoint
 @9:	loopnz @B
 	jnz @2F ; Y: not found, skip hook
 
 	lea rax, [hook_RtlUserThreadStart]
-	mov [rbp + rcx + CONTEXT.Rip], rax
+	mov [rbp + (rcx+1)*8 + CONTEXT.Rip], rax
 @2:	leave
 @1:	mov eax, 1
 	retn
@@ -67,6 +68,7 @@ _Sub:	; __declspec(dllexport) int Subtract(int a, int b) {
 
 ; configure linker from here
 virtual as "response"
+	db '/NOLOGO',10
 ;	db '/VERBOSE',10 ; use to debug process
 	db '/NODEFAULTLIB',10
 	db "/DLL",10
@@ -101,47 +103,20 @@ struct IMAGE_DOS_HEADER
 	e_lfanew	dd ?
 ends
 
-struct IMAGE_DATA_DIRECTORY
-	VirtualAddress	dd ?
-	Size		dd ?
+struct IMAGE_NT_HEADERS64
+	Signature	dd ?
+	FileHeader	IMAGE_FILE_HEADER
+	OptionalHeader	IMAGE_OPTIONAL_HEADER64
 ends
-IMAGE_NUMBEROF_DIRECTORY_ENTRIES := 16
 
-struct IMAGE_OPTIONAL_HEADER
-	Magic				dw ?
-	MajorLinkerVersion		db ?
-	MinorLinkerVersion		db ?
-	SizeOfCode			dd ?
-	SizeOfInitializedData		dd ?
-	SizeOfUninitializedData		dd ?
-	AddressOfEntryPoint		dd ?
-	BaseOfCode			dd ?
-	BaseOfData			dd ?
-	ImageBase			dd ?
-	SectionAlignment		dd ?
-	FileAlignment			dd ?
-	MajorOperatingSystemVersion	dw ?
-	MinorOperatingSystemVersion	dw ?
-	MajorImageVersion		dw ?
-	MinorImageVersion		dw ?
-	MajorSubsystemVersion		dw ?
-	MinorSubsystemVersion		dw ?
-	Win32VersionValue		dd ?
-	SizeOfImage			dd ?
-	SizeOfHeaders			dd ?
-	CheckSum			dd ?
-	Subsystem			dw ?
-	DllCharacteristics		dw ?
-	SizeOfStackReserve		dd ?
-	SizeOfStackCommit		dd ?
-	SizeOfHeapReserve		dd ?
-	SizeOfHeapCommit		dd ?
-	LoaderFlags			dd ?
-	NumberOfRvaAndSizes		dd ?
-	DataDirectory			IMAGE_DATA_DIRECTORY
-	repeat IMAGE_NUMBEROF_DIRECTORY_ENTRIES-1
-		DataDirectory.% IMAGE_DATA_DIRECTORY
-	end repeat
+struct IMAGE_FILE_HEADER
+	Machine			dw ?
+	NumberOfSections	dw ?
+	TimeDateStamp		dd ?
+	PointerToSymbolTable	dd ?
+	NumberOfSymbols		dd ?
+	SizeOfOptionalHeader	dw ?
+	Characteristics		dw ?
 ends
 
 struct IMAGE_OPTIONAL_HEADER64
@@ -179,6 +154,14 @@ struct IMAGE_OPTIONAL_HEADER64
 		DataDirectory.% IMAGE_DATA_DIRECTORY
 	end repeat
 ends
+
+struct IMAGE_DATA_DIRECTORY
+	VirtualAddress	dd ?
+	Size		dd ?
+ends
+
+IMAGE_NUMBEROF_DIRECTORY_ENTRIES := 16
+
 
 
 ; DECLSPEC_ALIGN(16)

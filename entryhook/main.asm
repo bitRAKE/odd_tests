@@ -2,41 +2,26 @@ include 'windows.g'
 ;	fasm2 main.asm
 ;	link @main.response main.obj
 
-extrn '?Add@@YAHHH@Z'		as _Add		; int Add(int a, int b);
-extrn '?Subtract@@YAHHH@Z'	as _Sub		; int Subtract(int a, int b);
+extrn 'Add'		as _Add	; int Add(int a, int b);
+extrn 'Subtract'	as _Sub	; int Subtract(int a, int b);
 
-public _DllMainCRTStartup as '_DllMainCRTStartup' ; linker expects this default name
-:_DllMainCRTStartup:
-	cmp edx, DLL_PROCESS_ATTACH
-	jnz @1F
+public WinMainCRTStartup as 'WinMainCRTStartup' ; linker expects this default name
+:WinMainCRTStartup:
+	pop rax ; no return
 
-	enter .frame, 0
-	GetModuleHandleA A "ntdll"
-	xchg rcx, rax
-	GetProcAddress rcx, A "RtlUserThreadStart"
-	mov [original_RtlUserThreadStart], rax
+	MessageBoxA 0, A "Hello, World!", A "Try", MB_OK
 
-	lea rdx, [__ImageBase]
-	mov ecx, [rdx + IMAGE_DOS_HEADER.e_lfanew]
-	mov ecx, [rdx + rcx + IMAGE_OPTIONAL_HEADER64.AddressOfEntryPoint]
-	add rdx, rcx
-
-	mov ecx, 0x1000 ; search range
-@@:	cmp [rbp + rcx + CONTEXT.Rip], rax ; original_RtlUserThreadStart
-	jnz @9F
-	cmp [rbp + rcx + CONTEXT.Rcx], rdx ; entryPoint
-@9:	loopnz @B
-	jnz @2F ; Y: not found, skip hook
-
-	lea rax, [hook_RtlUserThreadStart]
-	mov [rbp + rcx + CONTEXT.Rip], rax
-@2:	leave
-@1:	mov eax, 1
-	retn
+	fastcall _Add, -1, -2
+	xchg ecx, eax
+	fastcall _Sub, ecx, -3
+	xchg ecx, eax
+	ExitProcess ecx
+	jmp $
 
 
 ; configure linker from here
 virtual as "response"
+	db '/NOLOGO',10
 ;	db '/VERBOSE',10 ; use to debug process
 	db '/NODEFAULTLIB',10
 	db '/SUBSYSTEM:WINDOWS,6.02',10
