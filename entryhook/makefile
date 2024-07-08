@@ -11,11 +11,7 @@ all : dll.dll main.exe
 main.exe : main.obj
 	link @main.response $**
 
-random.obj : AppConsole.g wincon.g
-
-
-gdi_pts.obj gdi_gfx.obj : AppWindow.g
-
+main.response : main.obj
 
 dll.dll : dll.obj
 	link @dll.response $**

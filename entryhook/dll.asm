@@ -25,7 +25,7 @@ public _DllMainCRTStartup as '_DllMainCRTStartup' ; linker expects this default 
 	jnz @1F
 
 	enter .frame, 0
-	GetModuleHandleA A "ntdll.dll"
+	GetModuleHandleA A "ntdll"
 	xchg rcx, rax
 	GetProcAddress rcx, A "RtlUserThreadStart"
 	mov [original_RtlUserThreadStart], rax

@@ -1,0 +1,6 @@
+/NOLOGO
+/NODEFAULTLIB
+/SUBSYSTEM:WINDOWS,6.02
+kernel32.lib
+user32.lib
+dll.lib
