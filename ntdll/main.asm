@@ -11,7 +11,7 @@ public mainCRTStartup as 'mainCRTStartup' ; linker expects this default name
 mainCRTStartup:
 
 	{data:8} .allocationSize dq 2048
-	{bss:16} .status IO_STATUS_BLOCK ?,? ; Status, Information
+	{bss:16} .status IO_STATUS_BLOCK
 
 	{const:2} .filename du '\??\CONOUT$',0
 	{const:2} .filename.bytes := $ - .filename - 2
@@ -59,13 +59,13 @@ mainCRTStartup:
 {const:8} .byte_offset dq 0
 
 	lea rax, [.byte_offset]
+	lea rcx, [.message]
+	lea rdx, [.status]
 	push 0				; PULONG key, optional
 	push rax			; byte offset
 	push .message.bytes		; length
-	lea rax, [.message]
-	push rax			; buffer
-	lea rax, [.status]
-	push rax			; PIO_STATUS_BLOCK
+	push rcx			; buffer
+	push rdx			; PIO_STATUS_BLOCK
 	sub rsp, 8*5 ; shadow space, return address placeholder
 	xor r9, r9			; PVOID ApcContext, optional
 	xor r8, r8			; PIO_APC_ROUTINE ApcRoutine, optional

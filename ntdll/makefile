@@ -7,13 +7,19 @@ fasm2 = C:\_daily\asmgame\fasm2.cmd
 	@if not exist $(<:.asm=.obj) exit 1
 
 
-all : main.exe tidy
+all : main.exe main_x32.exe tidy
 
 
 main.exe : main.obj
 	link @$*.response $**
 
 main.response : main.obj
+
+
+main_x32.exe : main_x32.obj
+	link @$*.response $**
+
+main_x32.response : main_x32.obj
 
 
 

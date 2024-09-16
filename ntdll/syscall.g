@@ -1,3 +1,8 @@
+if ~ definite SYSCALL_BUILD
+	err "syscall support requires defining SYSCALL_BUILD version string"
+end if
+
+;-------------------------------------------------------------------------------
 format MS64 COFF
 section ".text$t" code executable readable align 64
 
@@ -32,25 +37,23 @@ end calminstruction
 ;	https://github.com/hfiref0x/SyscallTables
 ;	https://github.com/j00ru/windows-syscalls
 
-if definite SYSCALL_BUILD
 
-	define SYSCALLS SYSCALLS ; searchable namespace
-	namespace SYSCALLS
-
-	; the expectation is a name followed by a computable number
+define SYSCALLS SYSCALLS ; searchable namespace
+namespace SYSCALLS
+	; the expectation is a name followed by a number
 	calminstruction reader line&
 		match =mvmacro?= any?,line
 		jno go
 		assemble line
 		exit
 
-	go:	match name value,line
-		jno unknown
-		compute value,value
+	go:	match name= value,line
+		jno unkwn
+;		compute value,value ; note: `transform doesn't work with numerical values
 		publish name:,value
 		exit
-	unknown:
-		stringify line
+
+	unkwn:	stringify line
 		display "invalid syscall listing: "
 		display line
 		err
@@ -66,23 +69,18 @@ if definite SYSCALL_BUILD
 	mvmacro ?,reader
 	mvmacro reader,?
 	purge reader
+end namespace ; SYSCALLS
 
-	end namespace ; SYSCALLS
+calminstruction syscall? function
+	transform function,SYSCALLS
+	jyes known
+	arrange function,=syscall function
+	assemble function
+	exit
 
-	calminstruction syscall? function
-;		transform function,SYSCALLS
-;		jyes known
-;		display 'x'
-;		arrange function,=syscall function
-;		assemble function
-;		exit
+known:	arrange function,=mov =eax, function
+	assemble function
+	arrange function,=syscall
+	assemble function
+end calminstruction
 
-	known:	arrange function,=mov =eax, =SYSCALLS.function
-		assemble function
-		arrange function,=syscall
-		assemble function
-	end calminstruction
-
-else
-	err "syscall support requires defining SYSCALL_BUILD version string"
-end if

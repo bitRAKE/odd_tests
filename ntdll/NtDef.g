@@ -3,25 +3,19 @@
 ;	https://github.com/winsiderss/systeminformer/tree/master/phnt/include
 ;	https://github.com/MeeSong/Reverse-Engineering/tree/master/Include
 
+NtCurrentProcess	:=-1
+NtCurrentThread		:=-2
+NtCurrentSession	:=-3
+NtCurrentProcessToken	:=-4 ; NtOpenProcessToken(NtCurrentProcess())
+NtCurrentThreadToken	:=-5 ; NtOpenThreadToken(NtCurrentThread())
+NtCurrentEffectiveToken	:=-6 ; NtOpenThreadToken(NtCurrentThread()), NtOpenProcessToken(NtCurrentProcess())
+NtCurrentSilo		:=-1
 
 
 DOS_MAX_COMPONENT_LENGTH:= 255
 DOS_MAX_PATH_LENGTH	:= DOS_MAX_COMPONENT_LENGTH + 5
 MAX_PATH		:= DOS_MAX_PATH_LENGTH
 MAXIMUM_FILENAME_LENGTH	:= DOS_MAX_COMPONENT_LENGTH + 1
-
-
-
-NtCurrentProcess	:=-1
-NtCurrentThread		:=-2
-NtCurrentSession	:=-3
-NtCurrentProcessToken	:=-4 ; NtOpenProcessToken(NtCurrentProcess())
-NtCurrentThreadToken	:=-5 ; NtOpenThreadToken(NtCurrentThread())
-NtCurrentEffectiveToken	:=-6 ; NtOpenThreadToken(NtCurrentThread()) + NtOpenProcessToken(NtCurrentProcess())
-NtCurrentSilo		:=-1
-
-
-
 
 
 struct UNICODE_STRING
