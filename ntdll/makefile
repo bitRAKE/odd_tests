@@ -1,32 +1,29 @@
-fasm2 = c:\fasm2\fasm2.cmd
+fasm2 = C:\_daily\asmgame\fasm2.cmd
 
 .SUFFIXES : .asm.obj
 
 .asm.obj :
 	$(fasm2) -e 5 $<
+	@if not exist $(<:.asm=.obj) exit 1
 
 
-all : dll.dll main.exe
+all : main.exe tidy
+
 
 main.exe : main.obj
-	link @main.response $**
+	link @$*.response $**
 
 main.response : main.obj
-
-dll.dll : dll.obj
-	link @dll.response $**
-
-dll.response : dll.obj
 
 
 
 .SILENT :
 
-clean :
-	del /S /Q *.obj >NUL 2>&1
-	del /S /Q *.exp >NUL 2>&1
-	del /S /Q *.lib >NUL 2>&1
-	del /S /Q *.response 2>NUL 2>&1
-	del /S /Q *.exe 2>NUL 2>&1
-	del /S /Q *.dll 2>NUL 2>&1
-	del /S /Q *.zip 2>NUL 2>&1
+tidy :
+	del /S /Q *.obj *.response >NUL 2>&1
+
+clean : tidy
+	del /S /Q *.exp *.lib *.dll *.exe *.zip >NUL 2>&1
+
+#package : clean
+#	tar -a -cf main.zip --exclude=main.zip *

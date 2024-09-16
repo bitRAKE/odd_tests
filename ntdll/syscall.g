@@ -1,3 +1,27 @@
+format MS64 COFF
+section ".text$t" code executable readable align 64
+
+; https://devblogs.microsoft.com/oldnewthing/20041025-00/?p=37483
+extrn __ImageBase ; the linker knows
+
+include 'anchor.g'	; aligned data groups
+include 'light-fast.g'
+
+include 'macro/struct.inc'
+Struct.CheckAlignment = 1
+
+calminstruction ?? line& ; part of anchor, but needs to be here
+	match {section:grain} line, line
+	jyes datas
+	assemble line
+	exit
+datas:
+	arrange line,=COFF=.grain=.section line
+	assemble line
+	stringify line
+end calminstruction
+
+;-------------------------------------------------------------------------------
 ; Simple SYSCALL wrapper to abstract function numbers.
 ;
 ; Caution: syscall numbers are undocumented and specific to a particular
@@ -8,11 +32,10 @@
 ;	https://github.com/hfiref0x/SyscallTables
 ;	https://github.com/j00ru/windows-syscalls
 
-SYSCALL_BUILD equ "22621"
-
 if definite SYSCALL_BUILD
 
 	define SYSCALLS SYSCALLS ; searchable namespace
+	namespace SYSCALLS
 
 	; the expectation is a name followed by a computable number
 	calminstruction reader line&
@@ -24,7 +47,6 @@ if definite SYSCALL_BUILD
 	go:	match name value,line
 		jno unknown
 		compute value,value
-		arrange name,=SYSCALLS.name
 		publish name:,value
 		exit
 	unknown:
@@ -45,14 +67,17 @@ if definite SYSCALL_BUILD
 	mvmacro reader,?
 	purge reader
 
-	calminstruction syscall? function
-		transform function,SYSCALLS
-		jyes known
-		arrange function,=syscall function
-		assemble function
-		exit
+	end namespace ; SYSCALLS
 
-	known:	arrange function,=mov =eax, function
+	calminstruction syscall? function
+;		transform function,SYSCALLS
+;		jyes known
+;		display 'x'
+;		arrange function,=syscall function
+;		assemble function
+;		exit
+
+	known:	arrange function,=mov =eax, =SYSCALLS.function
 		assemble function
 		arrange function,=syscall
 		assemble function

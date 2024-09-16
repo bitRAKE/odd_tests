@@ -1,21 +1,31 @@
-include 'windows.g'
+
+include 'syscall.g', SYSCALL_BUILD equ "22621" ; change to your system build
+include 'NtDef.g'
+
 ;	fasm2 main.asm
 ;	link @main.response main.obj
 
-public WinMainCRTStartup as 'WinMainCRTStartup' ; linker expects this default name
-:WinMainCRTStartup:
+{bss:8} hStdOut dq ?
 
-; https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntcreatefile
+public mainCRTStartup as 'mainCRTStartup' ; linker expects this default name
+mainCRTStartup:
 
-{const:2} .filename du '\??\CONOUT$',0
-{const:2} .filename.bytes := $ - .filename - 2
-{const:2} .filename.buffer := $ - .filename
+	{data:8} .allocationSize dq 2048
+	{bss:16} .status IO_STATUS_BLOCK ?,? ; Status, Information
 
-{const:64} .filenameU UNICODE_STRING .filename.bytes,.filename.buffer,.filename
-{const:64} .attributes OBJECT_ATTRIBUTES Length: sizeof OBJECT_ATTRIBUTES,\
-	ObjectName: .filenameU,\
-	Attributes: OBJ_CASE_INSENSITIVE or OBJ_INHERIT
+	{const:2} .filename du '\??\CONOUT$',0
+	{const:2} .filename.bytes := $ - .filename - 2
+	{const:2} .filename.buffer := $ - .filename
 
+	{const:64} .filenameU UNICODE_STRING \
+		Length: .filename.bytes,\
+		MaximumLength: .filename.buffer,\
+		Buffer: .filename
+
+	{const:64} .attributes OBJECT_ATTRIBUTES64 \
+		Length: sizeof .attributes,\
+		ObjectName: .filenameU,\
+		Attributes: OBJ_CASE_INSENSITIVE or OBJ_INHERIT
 
 ; Note: SYSCALLs differs from standard fastcall in that `R10 is used instead
 ; of `RCX, space for a return address on the stack is expected.
@@ -41,62 +51,37 @@ public WinMainCRTStartup as 'WinMainCRTStartup' ; linker expects this default na
 	lea r8, [.attributes]
 	mov edx, GENERIC_WRITE ; DesiredAccess
 	lea r10, [hStdOut]
-	mov eax, 55h ; NtCreateFile
 	syscall NtCreateFile
 	add rsp, 8*(5+7)
 
+{const:1} .message db "Hello, World!"
+{const:1} .message.bytes := $ - .message
+{const:8} .byte_offset dq 0
 
-	mov eax, NtWriteFile
+	lea rax, [.byte_offset]
+	push 0				; PULONG key, optional
+	push rax			; byte offset
+	push .message.bytes		; length
+	lea rax, [.message]
+	push rax			; buffer
+	lea rax, [.status]
+	push rax			; PIO_STATUS_BLOCK
+	sub rsp, 8*5 ; shadow space, return address placeholder
+	xor r9, r9			; PVOID ApcContext, optional
+	xor r8, r8			; PIO_APC_ROUTINE ApcRoutine, optional
+	xor edx, edx			; HANDLE event, optional
+	mov r10, [hStdOut]
 	syscall NtWriteFile
-	add rsp, 8*(5+7)
+	add rsp, 8*(5+5)
 
+; Reusing the stack frame setup during process creation:
 
-	mov eax, NtTerminateProcess
+	mov r10, [hStdOut]
+	syscall NtClose
+
+	xor edx, edx ; NTSTATUS
+	mov r10, NtCurrentProcess ; HANDLE, optional
 	syscall NtTerminateProcess
-	add rsp, 8*(5+7)
-
-
-
-
-struct UNICODE_STRING
-	dw ?
-	dw ?
-	__0 rb 4
-	dq ?
-ends
-
-struct OBJECT_ATTRIBUTES
-	Length			dd ?,?	; ULONG
-	RootDirectory		dq ?	; HANDLE
-	ObjectName		dq ?	; PUNICODE_STRING
-	Attributes		dd ?,?	; ULONG
-	SecurityDescriptor	dq ?	; PSECURITY_DESCRIPTOR
-	SecurityQualityOfService dq ?	; PSECURITY_QUALITY_OF_SERVICE
-ends
-
-
-
-
-
-hStdOut 	dq ?
-status		dq ?,? ; Status, Information
-allocationSize	dq 2048
-
-attributes	dq sizeof attributes
-	dq 0
-	dq fnameUStr
-	dq OBJ_CASE_INSENSITIVE or OBJ_INHERIT
-	dq 0
-	dq 0
-
-fnameUStr:
-	dw filenameSz
-
-filename du '\??\CONOUT$',0
-filenameSz := $ - filename - 2
-
-
-
 	jmp $
 
 
