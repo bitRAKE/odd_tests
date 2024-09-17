@@ -85,9 +85,18 @@ mainCRTStartup:
 
 
 virtual as "response" ; configure linker from here
-	db '/NOLOGO',10
-;	db '/VERBOSE',10 ; use to debug build process
+	db '/NOLOGO',10 ; don't show linker version header
+
+; Use to debug build process:
+;	db '/VERBOSE',10
+;	db '/TIME+',10
+
+; Create unique binary using image version and checksum:
+	repeat 1,T:__TIME__ shr 16,t:__TIME__ and 0xFFFF
+		db '/VERSION:',`T,'.',`t,10
+	end repeat
 	db '/RELEASE',10 ; set program checksum in header
+
 	db '/NODEFAULTLIB',10
 	db '/IGNORE:4281',10 ; ASLR doesn't happen for /FIXED!
 	db '/FIXED',10 ; don't generate relocation information

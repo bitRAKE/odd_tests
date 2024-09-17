@@ -1,4 +1,17 @@
 
+; work in progress ...
+; References:
+;	\Windows Kits\10\Include\10.0.22621.0
+;		\um\nt*
+;		\km\nt*
+;	https://github.com/MeeSong/Reverse-Engineering/blob/master/Include/ntbase.h
+;	https://github.com/0mWindyBug/MinifilterHook/blob/dd2f68a28036b6c3c9949732fdb837aee6e5e8e4/WdfltHook/WdfltHook/ntdefs.h#L268
+;	https://github.com/AlexanderBagel/ProcessMemoryMap/blob/master/doc/ntdll.h
+
+
+
+
+
 calminstruction NtCurrentTeb reg*
 	arrange reg, =mov reg,=qword [=gs:0x30]
 	assemble reg

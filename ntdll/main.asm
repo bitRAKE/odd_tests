@@ -10,7 +10,7 @@ include 'NtDef.g'
 public mainCRTStartup as 'mainCRTStartup' ; linker expects this default name
 mainCRTStartup:
 
-	{data:8} .allocationSize dq 2048
+	{data:8} .allocationSize dq 2048 ; LARGE_INTEGER
 	{bss:16} .status IO_STATUS_BLOCK
 
 	{const:2} .filename du '\??\CONOUT$',0
@@ -33,8 +33,8 @@ mainCRTStartup:
 ;	virtual at RSP
 ;		.RET	dq ?	; unused space needed
 ;			rq 4	; shadow space
-;		.P4	dq ?
-;		...
+;		.P5	dq ?	; parameter five should be on stack
+;		... more stack parameters
 ;	end virtual
 
 	xor ecx, ecx
