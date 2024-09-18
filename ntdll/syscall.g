@@ -68,6 +68,7 @@ namespace SYSCALLS
 	include "x86_64\NT10\win32k\" bappend SYSCALL_BUILD bappend ".txt",\
 	mvmacro ?,reader
 	mvmacro reader,?
+
 	purge reader
 end namespace ; SYSCALLS
 

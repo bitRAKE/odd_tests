@@ -12,7 +12,7 @@ mainCRTStartup:
 	mov ebp, esp
 
 	{data:8} .allocationSize dq 2048
-	{bss:16} .status IO_STATUS_BLOCK
+	{bss:16} .result IO_STATUS_BLOCK
 
 	{data:2} .filename du '\??\CONOUT$',0
 	{data:2} .filename.bytes := $ - .filename - 2
@@ -47,7 +47,7 @@ mainCRTStartup:
 	push FILE_ATTRIBUTE_NORMAL ; FileAttributes
 	push .allocationSize
 	sub esp, 8*5 ; shadow space, return address placeholder
-	lea r9, [.status]
+	lea r9, [.result]
 	lea r8, [.attributes]
 	mov edx, GENERIC_WRITE ; DesiredAccess
 	lea r10, [hStdOut]
@@ -62,7 +62,7 @@ mainCRTStartup:
 	push .byte_offset		; byte offset
 	push .message.bytes		; length
 	push .message			; buffer
-	push .status			; PIO_STATUS_BLOCK
+	push .result			; PIO_STATUS_BLOCK
 	sub esp, 8*5 ; shadow space, return address placeholder
 	xor r9, r9			; PVOID ApcContext, optional
 	xor r8, r8			; PIO_APC_ROUTINE ApcRoutine, optional
@@ -74,18 +74,25 @@ mainCRTStartup:
 	mov rbp, [rsp + 8]
 ; Reusing the stack frame setup during process creation:
 
+{data:8} .freq	dq 0
+{data:8} .count	dq 0
+	lea edx, [.freq]
+	lea r10, [.count]
+	syscall NtQueryPerformanceCounter
+
 	mov r10, [hStdOut]
 	syscall NtClose
 
-	xor edx, edx ; NTSTATUS
+	mov edx, [.result.Status] ; NTSTATUS
 	assert NtCurrentProcess = -1
 	or r10, NtCurrentProcess ; HANDLE, optional
 	syscall NtTerminateProcess
 	jmp $
 
 
-virtual as "response" ; configure linker from here
-	db '/NOLOGO',10 ; don't show linker version header
+virtual as "response" ; Configure linker from here:
+; don't show linker version header
+	db '/NOLOGO',10
 
 ; Use to debug build process:
 ;	db '/VERBOSE',10
@@ -95,25 +102,26 @@ virtual as "response" ; configure linker from here
 	repeat 1,T:__TIME__ shr 16,t:__TIME__ and 0xFFFF
 		db '/VERSION:',`T,'.',`t,10
 	end repeat
-	db '/RELEASE',10 ; set program checksum in header
+	; set program checksum in header
+	db '/RELEASE',10
 
 	db '/NODEFAULTLIB',10
 	db '/IGNORE:4281',10 ; ASLR doesn't happen for /FIXED!
 	db '/FIXED',10 ; don't generate relocation information
 ;	db '/DYNAMICBASE:NO',10 ; same as /FIXED
-	db '/BASE:0x10000',10
-	db '/SUBSYSTEM:CONSOLE',10
+	db '/BASE:0x7FFF0000',10 ; above KUSER_SHARED_DATA
+	db '/SUBSYSTEM:CONSOLE,6.02',10
 
 ; UNDOCUMENTED: no POGO debug info stored, corrupts sections?
 	db '/EMITPOGOPHASEINFO',10
+	; todo: what is the 64-bytes still present in .rdata?
 	db '/MERGE:.rdata=.text',10 ; needed to prevent corruption.
-; todo: what is the 64-bytes still present in .rdata?
 
 ; DLLs are loaded into 32-bit address space (ntdll still high!)
 ;	db '/LARGEADDRESSAWARE:NO',10
 
-;	db '/HEAP:reserve,commit',10
-;	db '/STACK:reserve,commit',10
+;	db '/HEAP:0x80000000,0x1000',10 ; 2GB
+;	db '/STACK:0x100000,0x1000',10 ; 1MB
 
 	db '/HIGHENTROPYVA:NO',10
 	db '/GUARD:NO',10 ; requires /DYNAMICBASE
