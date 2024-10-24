@@ -1,6 +1,6 @@
 
 ; References:
-;	https://github.com/winsiderss/systeminformer/tree/master/phnt/include
+;	https://github.com/winsiderss/phnt
 ;	https://github.com/MeeSong/Reverse-Engineering/tree/master/Include
 
 NtCurrentProcess	:=-1
