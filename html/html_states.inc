@@ -1,46 +1,82 @@
 
-include 'html_states.g' ; macro support
+; https://html.spec.whatwg.org/multipage/parsing.html#parse-errors
+macro PARSE_ERROR error*&
+	; todo: unique error sub-routines (reduce to single call instruction)
+	push rdi
+	call Parser_error ; preserve character?
+	pop rdi
+end macro
+
+;-------------------------------------------------------------------------------
+; tokenizer state support abstracts:
+;	+ register use
+;	+ parser structure: data and code
+;	+ create a terse language based on requirements
+
+calminstruction _STATE cmd*,state*&
+	match A.B.C.D rest,state
+	jyes do
+	err 'unknown state'
+	exit
+do:	arrange cmd,cmd=,D
+	assemble cmd
+end calminstruction
+macro SWITCH_STATE state*&
+	_STATE mov [r12 + Parser.tokenizer_state], state
+end macro
+macro RETURN_STATE state*&
+	_STATE mov [r12 + Parser.tokenizer_return_state], state
+end macro
+macro RECONSUME_IN_STATE state*&
+	SWITCH_STATE state
+	stc ; re-dispatch? ; goto state with character
+	ret
+end macro
+
+;	Parser_emitCharacter, returns zero
+;	Parser_emitEof
 
 
+; Note:
+;	+ most of the cases can be short cutted to common code
+;	+ most states only have a couple branches, byte index into dense table:
+;		movzx eax, byte [STATE]
+;		jmp [rcx + rax*8]
+
+
+;-------------------------------------------------------------------------------
 ; Reference:
 ;	https://html.spec.whatwg.org/multipage/parsing.html#tokenization
+
+include 'html_states.g' ; macro support
 
 state	13.2.5.1 Data state
 ; Consume the next input character:
 
 	U+0026 AMPERSAND (&)
 	; Set the return state to the data state. Switch to the character reference state.
-		mov [r12 + Parser.tokenizer_return_state], DATA_STATE_INDEX
-		mov [r12 + Parser.tokenizer_state], CHAR_REF_STATE_INDEX
+		RETURN_STATE 13.2.5.1 Data state
+		SWITCH_STATE 13.2.5.72 Character reference state
 		xor eax,eax
 		ret
 
 	U+003C LESS-THAN SIGN (<)
 	; Switch to the tag open state.
-		mov [r12 + Parser.tokenizer_state], TAG_OPEN_STATE_INDEX
+		SWITCH_STATE 13.2.5.6 Tag open state
 		xor eax,eax
 		ret
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit the current input character as a character token.
-		push rdi
-		call Parser_error
-		pop rdi
-		call Parser_emitCharacter
-		xor eax,eax
-		ret
+		PARSE_ERROR unexpected-null-character
+		jmp ANY
 
-;	EOF
-;	; Emit an end-of-file token.
-;		jmp Parser_emitEof
+	EOF equ Parser_emitEof
+	; Emit an end-of-file token.
 
-	EOF equ Parser_emitEof ; save a JMP by short-cutting the reference
-
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
-		call  Parser_emitCharacter
-		xor eax,eax
-		ret
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -52,18 +88,29 @@ state	13.2.5.2 RCDATA state
 
 	U+0026 AMPERSAND (&)
 	; Set the return state to the RCDATA state. Switch to the character reference state.
+		RETURN_STATE 13.2.5.2 RCDATA state
+		SWITCH_STATE 13.2.5.72 Character reference state
+		xor eax,eax
+		ret
 
 	U+003C LESS-THAN SIGN (<)
 	; Switch to the RCDATA less-than sign state.
+		SWITCH_STATE 13.2.5.9 RCDATA less-than sign state
+		xor eax,eax
+		ret
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
+		mov edi, 0xFFFD
+		jmp ANY
 
-	EOF
+	EOF equ Parser_emitEof
 	; Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -73,15 +120,22 @@ state	13.2.5.3 RAWTEXT state
 
 	U+003C LESS-THAN SIGN (<)
 	; Switch to the RAWTEXT less-than sign state.
+		SWITCH_STATE 13.2.5.12 RAWTEXT less-than sign state
+		xor eax,eax
+		ret
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
+		mov edi, 0xFFFD
+		jmp ANY
 
-	EOF
+	EOF equ Parser_emitEof
 	; Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -91,15 +145,22 @@ state	13.2.5.4 Script data state
 
 	U+003C LESS-THAN SIGN (<)
 	; Switch to the script data less-than sign state.
+		SWITCH_STATE 13.2.5.15 Script data less-than sign state
+		xor eax,eax
+		ret
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
+		mov edi, 0xFFFD
+		jmp ANY
 
-	EOF
+	EOF equ Parser_emitEof
 	; Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -109,12 +170,16 @@ state	13.2.5.5 PLAINTEXT state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
+		mov edi, 0xFFFD
+		jmp ANY
 
-	EOF
+	EOF equ Parser_emitEof
 	; Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -124,21 +189,40 @@ state	13.2.5.6 Tag open state
 
 	U+0021 EXCLAMATION MARK (!)
 	; Switch to the markup declaration open state.
+		SWITCH_STATE 13.2.5.42 Markup declaration open state
+		xor eax,eax
+		ret
 
 	U+002F SOLIDUS (/)
 	; Switch to the end tag open state.
+		SWITCH_STATE 13.2.5.7 End tag open state
+		xor eax,eax
+		ret
 
 	ASCII alpha
 	; Create a new start tag token, set its tag name to the empty string. Reconsume in the tag name state.
+		; todo: create empty string tag token
+		RECONSUME_IN_STATE 13.2.5.8 Tag name state
 
 	U+003F QUESTION MARK (?)
 	; This is an unexpected-question-mark-instead-of-tag-name parse error. Create a comment token whose data is the empty string. Reconsume in the bogus comment state.
+		PARSE_ERROR unexpected-question-mark-instead-of-tag-name
+		; todo: create empty string comment token
+		RECONSUME_IN_STATE 13.2.5.41 Bogus comment state
 
 	EOF
 	; This is an eof-before-tag-name parse error. Emit a U+003C LESS-THAN SIGN character token and an end-of-file token.
+		PARSE_ERROR eof-before-tag-name
+		mov edi, 0x003C
+		call Parser_emitCharacter
+		jmp Parser_emitEof
 
 	Anything else
 	; This is an invalid-first-character-of-tag-name parse error. Emit a U+003C LESS-THAN SIGN character token. Reconsume in the data state.
+		PARSE_ERROR invalid-first-character-of-tag-name
+		mov edi, 0x003C
+		call Parser_emitCharacter
+		RECONSUME_IN_STATE 13.2.5.1 Data state
 
 end state
 
@@ -181,6 +265,7 @@ state	13.2.5.8 Tag name state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current tag token's tag name.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-tag parse error. Emit an end-of-file token.
@@ -389,12 +474,14 @@ state	13.2.5.20 Script data escaped state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-script-html-comment-like-text parse error. Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -410,6 +497,7 @@ state	13.2.5.21 Script data escaped dash state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Switch to the script data escaped state. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-script-html-comment-like-text parse error. Emit an end-of-file token.
@@ -434,6 +522,7 @@ state	13.2.5.22 Script data escaped dash dash state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Switch to the script data escaped state. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-script-html-comment-like-text parse error. Emit an end-of-file token.
@@ -532,12 +621,14 @@ state	13.2.5.27 Script data double escaped state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-script-html-comment-like-text parse error. Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 end state
 
@@ -553,6 +644,7 @@ state	13.2.5.28 Script data double escaped dash state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Switch to the script data double escaped state. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-script-html-comment-like-text parse error. Emit an end-of-file token.
@@ -577,6 +669,7 @@ state	13.2.5.29 Script data double escaped dash dash state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Switch to the script data double escaped state. Emit a U+FFFD REPLACEMENT CHARACTER character token.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-script-html-comment-like-text parse error. Emit an end-of-file token.
@@ -665,6 +758,7 @@ state	13.2.5.33 Attribute name state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current attribute's name.
+		PARSE_ERROR unexpected-null-character
 
 	U+0022 QUOTATION MARK (")
 	U+0027 APOSTROPHE (')
@@ -742,6 +836,7 @@ state	13.2.5.36 Attribute value (double-quoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current attribute's value.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-tag parse error. Emit an end-of-file token.
@@ -763,6 +858,7 @@ state	13.2.5.37 Attribute value (single-quoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current attribute's value.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-tag parse error. Emit an end-of-file token.
@@ -790,6 +886,7 @@ state	13.2.5.38 Attribute value (unquoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current attribute's value.
+		PARSE_ERROR unexpected-null-character
 
 	U+0022 QUOTATION MARK (")
 	U+0027 APOSTROPHE (')
@@ -857,6 +954,7 @@ state	13.2.5.41 Bogus comment state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the comment token's data.
+		PARSE_ERROR unexpected-null-character
 
 	Anything else
 	; Append the current input character to the comment token's data.
@@ -926,6 +1024,7 @@ state	13.2.5.45 Comment state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the comment token's data.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-comment parse error. Emit the current comment token. Emit an end-of-file token.
@@ -1076,6 +1175,7 @@ state	13.2.5.54 Before DOCTYPE name state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Create a new DOCTYPE token. Set the token's name to a U+FFFD REPLACEMENT CHARACTER character. Switch to the DOCTYPE name state.
+		PARSE_ERROR unexpected-null-character
 
 	U+003E GREATER-THAN SIGN (>)
 	; This is a missing-doctype-name parse error. Create a new DOCTYPE token. Set its force-quirks flag to on. Switch to the data state. Emit the current token.
@@ -1106,6 +1206,7 @@ state	13.2.5.55 DOCTYPE name state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current DOCTYPE token's name.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; This is an eof-in-doctype parse error. Set the current DOCTYPE token's force-quirks flag to on. Emit the current DOCTYPE token. Emit an end-of-file token.
@@ -1203,6 +1304,7 @@ state	13.2.5.59 DOCTYPE public identifier (double-quoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current DOCTYPE token's public identifier.
+		PARSE_ERROR unexpected-null-character
 
 	U+003E GREATER-THAN SIGN (>)
 	; This is an abrupt-doctype-public-identifier parse error. Set the current DOCTYPE token's force-quirks flag to on. Switch to the data state. Emit the current DOCTYPE token.
@@ -1224,6 +1326,7 @@ state	13.2.5.60 DOCTYPE public identifier (single-quoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current DOCTYPE token's public identifier.
+		PARSE_ERROR unexpected-null-character
 
 	U+003E GREATER-THAN SIGN (>)
 	; This is an abrupt-doctype-public-identifier parse error. Set the current DOCTYPE token's force-quirks flag to on. Switch to the data state. Emit the current DOCTYPE token.
@@ -1353,6 +1456,7 @@ state	13.2.5.65 DOCTYPE system identifier (double-quoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current DOCTYPE token's system identifier.
+		PARSE_ERROR unexpected-null-character
 
 	U+003E GREATER-THAN SIGN (>)
 	; This is an abrupt-doctype-system-identifier parse error. Set the current DOCTYPE token's force-quirks flag to on. Switch to the data state. Emit the current DOCTYPE token.
@@ -1374,6 +1478,7 @@ state	13.2.5.66 DOCTYPE system identifier (single-quoted) state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Append a U+FFFD REPLACEMENT CHARACTER character to the current DOCTYPE token's system identifier.
+		PARSE_ERROR unexpected-null-character
 
 	U+003E GREATER-THAN SIGN (>)
 	; This is an abrupt-doctype-system-identifier parse error. Set the current DOCTYPE token's force-quirks flag to on. Switch to the data state. Emit the current DOCTYPE token.
@@ -1416,6 +1521,7 @@ state	13.2.5.68 Bogus DOCTYPE state
 
 	U+0000 NULL
 	; This is an unexpected-null-character parse error. Ignore the character.
+		PARSE_ERROR unexpected-null-character
 
 	EOF
 	; Emit the DOCTYPE token. Emit an end-of-file token.
@@ -1435,8 +1541,9 @@ state	13.2.5.69 CDATA section state
 	EOF
 	; This is an eof-in-cdata parse error. Emit an end-of-file token.
 
-	Anything else
+;	Anything else
 	; Emit the current input character as a character token.
+	ANY equ Parser_emitCharacter
 
 ; Note: U+0000 NULL characters are handled in the tree construction stage, as part of the in foreign content insertion mode, which is the only place where CDATA sections can appear.
 
@@ -1485,7 +1592,7 @@ state	13.2.5.72 Character reference state
 end state
 
 
-;state	13.2.5.73 Named character reference state
+state	13.2.5.73 Named character reference state
 ; Consume the maximum number of characters possible, where the consumed characters are one of the identifiers in the first column of the named character references table. Append each character to the temporary buffer when it's consumed.
 ;
 ; If there is a match:
@@ -1502,7 +1609,7 @@ end state
 ;
 ; However, if the markup contains the string I'm &notit; I tell you in an attribute, no character reference is parsed and string remains intact (and there is no parse error).
 ;
-;end state
+end state
 
 
 state	13.2.5.74 Ambiguous ampersand state
@@ -1595,7 +1702,7 @@ state	13.2.5.79 Decimal character reference state
 end state
 
 
-;state	13.2.5.80 Numeric character reference end state
+state	13.2.5.80 Numeric character reference end state
 ; Check the character reference code:
 
 ; If the number is 0x00, then this is a null-character-reference parse error. Set the character reference code to 0xFFFD.
@@ -1639,4 +1746,4 @@ end state
 ;
 ; Set the temporary buffer to the empty string. Append a code point equal to the character reference code to the temporary buffer. Flush code points consumed as a character reference. Switch to the return state.
 ;
-;end state
+end state

@@ -13,22 +13,45 @@
 ;		- ASCII hex digit	[0-9A-Fa-f]
 ;		- ASCII upper hex digit	[A-F]
 ;		- ASCII lower hex digit	[a-f]
-
-
+;
 ;	+ rely on fasmg name collision to detect duplicates (need reverse lookup tool)
 ;	+ namespace wrapper allows several types of optimization using symbolic refereneces, but ditches the use bitmap - which means table generation requires brute-force discovery for ASCII range. Non-character states should use a vector for discovery: allowing as many pseudo-states as needed.
 ;
 
+; explicitly used table values, needed for optimization
+STATES.minimum = 64	; 0
+STATES.maximum = 64	; 'z'
+macro char_state value*
+	if value < STATES.minimum
+		STATES.minimum = value
+	end if
+	if value > STATES.maximum
+		STATES.maximum = value
+	end if
+	?value:
+end macro
+
 macro state? anchor*&
+
+	; gather a vector of defined states
+	define STATES anchor
+
 	; create a unique name - to prefix cases - based on anchor value
 	repeat 1,N:`anchor
 		;display `anchor,10
 		namespace ?N
 	end repeat
 
+	irpv _,STATES
+		INDEX := %%			; anchor -> index
+		define STATES.%% anchor		; anchor <- index
+		break
+	end irpv
+
 	macro state_range min*,max*
 		repeat 1+max-min, i:min
-			?i:
+			char_state i
+;			?i:
 		end repeat
 	end macro
 
@@ -113,7 +136,10 @@ macro state? anchor*&
 	new:	arrange var,0x#CODE ; process CODE as hexadecimal
 		compute val,var
 
-		arrange var,?val:
+;		arrange var,?val:
+;		assemble var
+
+		arrange var,=char_state val
 		assemble var
 		exit
 
