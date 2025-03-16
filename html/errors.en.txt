@@ -1,0 +1,146 @@
+abrupt-closing-of-empty-comment
+Unexpected end in empty comment.
+
+abrupt-doctype-public-identifier
+DOCTYPE public identifier abruptly ended.
+
+abrupt-doctype-system-identifier
+DOCTYPE system identifier abruptly ended.
+
+absence-of-digits-in-numeric-character-reference
+Numeric character reference has no digits.
+
+cdata-in-html-content
+Unexpected CDATA section in HTML.
+
+character-reference-outside-unicode-range
+Character reference outside Unicode range.
+
+control-character-in-input-stream
+Unexpected control character in input.
+
+control-character-reference
+Control character referenced numerically.
+
+duplicate-attribute
+Attribute duplicated in element.
+
+end-tag-with-attributes
+End tag should not have attributes.
+
+end-tag-with-trailing-solidus
+End tag should not end with '/'.
+
+eof-before-tag-name
+EOF reached before tag name.
+
+eof-in-cdata
+EOF reached inside CDATA section.
+
+eof-in-comment
+EOF reached inside comment.
+
+eof-in-doctype
+EOF reached inside DOCTYPE.
+
+eof-in-script-html-comment-like-text
+EOF reached inside script HTML-comment-like text.
+
+eof-in-tag
+EOF reached inside tag.
+
+incorrectly-closed-comment
+Comment incorrectly closed.
+
+incorrectly-opened-comment
+Comment incorrectly opened.
+
+invalid-character-sequence-after-doctype-name
+Invalid characters after DOCTYPE name.
+
+invalid-first-character-of-tag-name
+Invalid first character in tag name.
+
+missing-attribute-value
+Attribute value missing.
+
+missing-doctype-name
+DOCTYPE name missing.
+
+missing-doctype-public-identifier
+DOCTYPE public identifier missing.
+
+missing-doctype-system-identifier
+DOCTYPE system identifier missing.
+
+missing-end-tag-name
+End tag name missing.
+
+missing-quote-before-doctype-public-identifier
+Missing quote before DOCTYPE public identifier.
+
+missing-quote-before-doctype-system-identifier
+Missing quote before DOCTYPE system identifier.
+
+missing-semicolon-after-character-reference
+Missing ';' after character reference.
+
+missing-whitespace-after-doctype-public-keyword
+Missing whitespace after 'PUBLIC' keyword.
+
+missing-whitespace-after-doctype-system-keyword
+Missing whitespace after 'SYSTEM' keyword.
+
+missing-whitespace-before-doctype-name
+Missing whitespace before DOCTYPE name.
+
+missing-whitespace-between-attributes
+Missing whitespace between attributes.
+
+missing-whitespace-between-doctype-public-and-system-identifiers
+Missing whitespace between DOCTYPE public and system identifiers.
+
+nested-comment
+Nested comment detected.
+
+noncharacter-character-reference
+Reference to Unicode noncharacter.
+
+noncharacter-in-input-stream
+Unicode noncharacter in input stream.
+
+non-void-html-element-start-tag-with-trailing-solidus
+Non-void element start tag incorrectly self-closed.
+
+null-character-reference
+Null character referenced numerically.
+
+surrogate-character-reference
+Surrogate character referenced numerically.
+
+surrogate-in-input-stream
+Surrogate character in input stream.
+
+unexpected-character-after-doctype-system-identifier
+Unexpected character after DOCTYPE system identifier.
+
+unexpected-character-in-attribute-name
+Unexpected character in attribute name.
+
+unexpected-character-in-unquoted-attribute-value
+Unexpected character in unquoted attribute value.
+
+unexpected-equals-sign-before-attribute-name
+Unexpected '=' before attribute name.
+
+unexpected-null-character
+Unexpected null character.
+
+unexpected-question-mark-instead-of-tag-name
+Unexpected '?' instead of tag name.
+
+unexpected-solidus-in-tag
+Unexpected '/' in tag.
+
+unknown-named-character-reference
+Unknown named character reference.

@@ -1,0 +1,146 @@
+abrupt-closing-of-empty-comment
+Leerer Kommentar abrupt geschlossen.
+
+abrupt-doctype-public-identifier
+DOCTYPE-Public-Identifier abrupt beendet.
+
+abrupt-doctype-system-identifier
+DOCTYPE-System-Identifier abrupt beendet.
+
+absence-of-digits-in-numeric-character-reference
+Zahlen fehlen in numerischer Zeichenreferenz.
+
+cdata-in-html-content
+CDATA in HTML-Inhalt gefunden.
+
+character-reference-outside-unicode-range
+Zeichenreferenz außerhalb des Unicode-Bereichs.
+
+control-character-in-input-stream
+Steuerzeichen im Eingabestrom gefunden.
+
+control-character-reference
+Referenz auf Steuerzeichen gefunden.
+
+duplicate-attribute
+Attribut doppelt angegeben.
+
+end-tag-with-attributes
+End-Tag darf keine Attribute haben.
+
+end-tag-with-trailing-solidus
+End-Tag mit abschließendem Schrägstrich gefunden.
+
+eof-before-tag-name
+Unerwartetes Dateiende vor Tag-Namen.
+
+eof-in-cdata
+Unerwartetes Dateiende in CDATA.
+
+eof-in-comment
+Unerwartetes Dateiende in Kommentar.
+
+eof-in-doctype
+Unerwartetes Dateiende in DOCTYPE.
+
+eof-in-script-html-comment-like-text
+Unerwartetes Dateiende in Skript (HTML-Kommentar-ähnlicher Text).
+
+eof-in-tag
+Unerwartetes Dateiende im Tag.
+
+incorrectly-closed-comment
+Kommentar falsch geschlossen.
+
+incorrectly-opened-comment
+Kommentar falsch geöffnet.
+
+invalid-character-sequence-after-doctype-name
+Ungültige Zeichenfolge nach DOCTYPE-Namen.
+
+invalid-first-character-of-tag-name
+Ungültiges erstes Zeichen im Tag-Namen.
+
+missing-attribute-value
+Attributwert fehlt.
+
+missing-doctype-name
+DOCTYPE-Name fehlt.
+
+missing-doctype-public-identifier
+DOCTYPE-Public-Identifier fehlt.
+
+missing-doctype-system-identifier
+DOCTYPE-System-Identifier fehlt.
+
+missing-end-tag-name
+End-Tag-Name fehlt.
+
+missing-quote-before-doctype-public-identifier
+Anführungszeichen vor DOCTYPE-Public-Identifier fehlt.
+
+missing-quote-before-doctype-system-identifier
+Anführungszeichen vor DOCTYPE-System-Identifier fehlt.
+
+missing-semicolon-after-character-reference
+Semikolon nach Zeichenreferenz fehlt.
+
+missing-whitespace-after-doctype-public-keyword
+Leerraum nach Schlüsselwort PUBLIC in DOCTYPE fehlt.
+
+missing-whitespace-after-doctype-system-keyword
+Leerraum nach Schlüsselwort SYSTEM in DOCTYPE fehlt.
+
+missing-whitespace-before-doctype-name
+Leerraum vor DOCTYPE-Namen fehlt.
+
+missing-whitespace-between-attributes
+Leerraum zwischen Attributen fehlt.
+
+missing-whitespace-between-doctype-public-and-system-identifiers
+Leerraum zwischen DOCTYPE PUBLIC- und SYSTEM-Identifier fehlt.
+
+nested-comment
+Verschachtelter Kommentar gefunden.
+
+noncharacter-character-reference
+Zeichenreferenz verweist auf Nichtzeichen.
+
+noncharacter-in-input-stream
+Nichtzeichen im Eingabestrom gefunden.
+
+non-void-html-element-start-tag-with-trailing-solidus
+Nicht-leeres HTML-Element hat Start-Tag mit abschließendem Schrägstrich.
+
+null-character-reference
+Zeichenreferenz auf Null-Zeichen gefunden.
+
+surrogate-character-reference
+Zeichenreferenz auf Surrogat-Paar gefunden.
+
+surrogate-in-input-stream
+Surrogat-Zeichen im Eingabestrom gefunden.
+
+unexpected-character-after-doctype-system-identifier
+Unerwartetes Zeichen nach DOCTYPE-System-Identifier.
+
+unexpected-character-in-attribute-name
+Unerwartetes Zeichen im Attributnamen.
+
+unexpected-character-in-unquoted-attribute-value
+Unerwartetes Zeichen in unzitiertem Attributwert.
+
+unexpected-equals-sign-before-attribute-name
+Unerwartetes Gleichheitszeichen vor Attributnamen.
+
+unexpected-null-character
+Unerwartetes Null-Zeichen gefunden.
+
+unexpected-question-mark-instead-of-tag-name
+Unerwartetes Fragezeichen statt Tag-Namen.
+
+unexpected-solidus-in-tag
+Unerwarteter Schrägstrich im Tag.
+
+unknown-named-character-reference
+Unbekannte benannte Zeichenreferenz.

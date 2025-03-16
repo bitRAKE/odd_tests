@@ -1,0 +1,146 @@
+abrupt-closing-of-empty-comment
+Commentaire vide fermé brutalement.
+
+abrupt-doctype-public-identifier
+Identifiant public du DOCTYPE interrompu.
+
+abrupt-doctype-system-identifier
+Identifiant système du DOCTYPE interrompu.
+
+absence-of-digits-in-numeric-character-reference
+Aucun chiffre dans la référence numérique de caractère.
+
+cdata-in-html-content
+Section CDATA dans contenu HTML.
+
+character-reference-outside-unicode-range
+Référence de caractère hors plage Unicode.
+
+control-character-in-input-stream
+Caractère de contrôle dans le flux d'entrée.
+
+control-character-reference
+Référence à un caractère de contrôle.
+
+duplicate-attribute
+Attribut dupliqué.
+
+end-tag-with-attributes
+Balise fermante avec attributs.
+
+end-tag-with-trailing-solidus
+Balise fermante avec barre oblique finale.
+
+eof-before-tag-name
+Fin de fichier avant le nom de balise.
+
+eof-in-cdata
+Fin de fichier dans une section CDATA.
+
+eof-in-comment
+Fin de fichier dans un commentaire.
+
+eof-in-doctype
+Fin de fichier dans DOCTYPE.
+
+eof-in-script-html-comment-like-text
+Fin de fichier dans un commentaire HTML du script.
+
+eof-in-tag
+Fin de fichier dans une balise.
+
+incorrectly-closed-comment
+Commentaire fermé incorrectement.
+
+incorrectly-opened-comment
+Commentaire ouvert incorrectement.
+
+invalid-character-sequence-after-doctype-name
+Séquence invalide après le nom DOCTYPE.
+
+invalid-first-character-of-tag-name
+Premier caractère invalide dans le nom de balise.
+
+missing-attribute-value
+Valeur d'attribut manquante.
+
+missing-doctype-name
+Nom du DOCTYPE manquant.
+
+missing-doctype-public-identifier
+Identifiant public du DOCTYPE manquant.
+
+missing-doctype-system-identifier
+Identifiant système du DOCTYPE manquant.
+
+missing-end-tag-name
+Nom de balise fermante manquant.
+
+missing-quote-before-doctype-public-identifier
+Guillemet manquant avant l'identifiant public du DOCTYPE.
+
+missing-quote-before-doctype-system-identifier
+Guillemet manquant avant l'identifiant système du DOCTYPE.
+
+missing-semicolon-after-character-reference
+Point-virgule manquant après référence de caractère.
+
+missing-whitespace-after-doctype-public-keyword
+Espace manquant après le mot-clé PUBLIC du DOCTYPE.
+
+missing-whitespace-after-doctype-system-keyword
+Espace manquant après le mot-clé SYSTEM du DOCTYPE.
+
+missing-whitespace-before-doctype-name
+Espace manquant avant le nom du DOCTYPE.
+
+missing-whitespace-between-attributes
+Espace manquant entre attributs.
+
+missing-whitespace-between-doctype-public-and-system-identifiers
+Espace manquant entre identifiants PUBLIC et SYSTEM du DOCTYPE.
+
+nested-comment
+Commentaire imbriqué.
+
+noncharacter-character-reference
+Référence à un non-caractère.
+
+noncharacter-in-input-stream
+Non-caractère dans le flux d'entrée.
+
+non-void-html-element-start-tag-with-trailing-solidus
+Balise ouvrante d'élément HTML non vide avec barre oblique finale.
+
+null-character-reference
+Référence à caractère nul.
+
+surrogate-character-reference
+Référence à un demi-codet.
+
+surrogate-in-input-stream
+Demi-codet dans le flux d'entrée.
+
+unexpected-character-after-doctype-system-identifier
+Caractère inattendu après l'identifiant système du DOCTYPE.
+
+unexpected-character-in-attribute-name
+Caractère inattendu dans le nom d'attribut.
+
+unexpected-character-in-unquoted-attribute-value
+Caractère inattendu dans la valeur non citée d'attribut.
+
+unexpected-equals-sign-before-attribute-name
+Signe égal inattendu avant le nom d'attribut.
+
+unexpected-null-character
+Caractère nul inattendu.
+
+unexpected-question-mark-instead-of-tag-name
+Point d'interrogation inattendu à la place du nom de balise.
+
+unexpected-solidus-in-tag
+Barre oblique inattendue dans la balise.
+
+unknown-named-character-reference
+Référence nommée de caractère inconnue.
