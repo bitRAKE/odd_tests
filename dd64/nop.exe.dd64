@@ -1,0 +1,84 @@
+{
+ "comments": [
+  {
+   "module": "nop.exe",
+   "address": "0x2004",
+   "manual": true,
+   "text": "xor ecx,ecx"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x103B",
+   "manual": true,
+   "text": "section '.text' code readable executable"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x202B",
+   "manual": true,
+   "text": "section '.idata' import data readable writeable"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x1000",
+   "manual": true,
+   "text": "_title db 'AVX-512 playground',0"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x1013",
+   "manual": true,
+   "text": "_error db 'AVX-512 instructions are not supported.',0"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x2000",
+   "manual": true,
+   "text": "sub rsp,28h"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x2006",
+   "manual": true,
+   "text": "lea rdx,[_error]"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x200D",
+   "manual": true,
+   "text": "lea r8,[_title]"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x201A",
+   "manual": true,
+   "text": "call [MessageBoxA]"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x2014",
+   "manual": true,
+   "text": "mov r9d,10h"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x2020",
+   "manual": true,
+   "text": "mov ecx,1"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x2025",
+   "manual": true,
+   "text": "call [ExitProcess]"
+  },
+  {
+   "module": "nop.exe",
+   "address": "0x3000",
+   "manual": true,
+   "text": "imports KERNEL32.DLL, ExitProcess, USER32.DLL, MessageBoxA"
+  }
+ ],
+ "hashAlgorithm": "murmurhash",
+ "hash": "0x1FC78485ACF86F04"
+}
