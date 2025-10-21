@@ -1,4 +1,4 @@
-// clang -O3 -march=native -mavx512f -masm=intel -std=c23 test_harness.c powi_zmm.S -o test_powi.exe
+// clang -O3 -march=native -mavx512f -masm=intel -std=c23 test_harness.c vpowips.S -o test_powi.exe
 
 #include <stdint.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <immintrin.h>
 #include <stdbool.h>
 
-#include "powi_zmm_shim.h" // __m512 powi_zmm_call(__m512 base, uint32_t exp)
+#include "vpowips_shim.h" // __m512 vpowips_call(__m512 base, uint32_t exp)
 
 /* Reference implementation using scalar math */
 float reference_powi(float base, uint32_t exp) {
@@ -24,7 +24,7 @@ bool floats_equal(float a, float b, float epsilon) {
 
 /* Test a single vector of floats */
 void test_vector(__m512 base_vec, uint32_t exp, const char *desc) {
-    __m512 result = powi_zmm_call(base_vec, exp);
+    __m512 result = vpowips_call(base_vec, exp);
     
     float base_arr[16], result_arr[16];
     _mm512_storeu_ps(base_arr, base_vec);
@@ -55,7 +55,7 @@ void test_exp_zero(void) {
     float vals[] = {0.0f, 1.0f, 2.5f, -3.7f, 100.0f};
     for (int i = 0; i < 5; i++) {
         __m512 base = _mm512_set1_ps(vals[i]);
-        __m512 result = powi_zmm_call(base, 0);
+        __m512 result = vpowips_call(base, 0);
         float res = _mm512_cvtss_f32(result);
         printf("  %.1f^0 = %.3f (expect 1.000) - %s\n", 
                vals[i], res, fabsf(res - 1.0f) < 1e-5f ? "PASS" : "FAIL");
@@ -69,7 +69,7 @@ void test_exp_one(void) {
     float vals[] = {0.5f, 1.0f, 2.5f, -3.7f, 1000.0f};
     for (int i = 0; i < 5; i++) {
         __m512 base = _mm512_set1_ps(vals[i]);
-        __m512 result = powi_zmm_call(base, 1);
+        __m512 result = vpowips_call(base, 1);
         float res = _mm512_cvtss_f32(result);
         printf("  %.1f^1 = %.3f (expect %.3f) - %s\n", 
                vals[i], res, vals[i], 
@@ -85,7 +85,7 @@ void test_power_of_two(void) {
     uint32_t exps[] = {2, 4, 8, 16, 32};
     
     for (int i = 0; i < 5; i++) {
-        __m512 result = powi_zmm_call(base, exps[i]);
+        __m512 result = vpowips_call(base, exps[i]);
         float res = _mm512_cvtss_f32(result);
         float expected = powf(2.0f, (float)exps[i]);
         printf("  2^%u = %.1f (expect %.1f) - %s\n", 
@@ -103,7 +103,7 @@ void test_general_exponents(void) {
     for (int b = 0; b < 5; b++) {
         for (int e = 0; e < 5; e++) {
             __m512 base = _mm512_set1_ps(bases[b]);
-            __m512 result = powi_zmm_call(base, exps[e]);
+            __m512 result = vpowips_call(base, exps[e]);
             float res = _mm512_cvtss_f32(result);
             float expected = powf(bases[b], (float)exps[e]);
             float epsilon = fmaxf(1e-5f, 1e-5f * fabsf(expected));
@@ -126,7 +126,7 @@ void test_mixed_values(void) {
     __m512 base = _mm512_loadu_ps(vals);
     
     uint32_t exp = 3;
-    __m512 result = powi_zmm_call(base, exp);
+    __m512 result = vpowips_call(base, exp);
     
     float result_arr[16];
     _mm512_storeu_ps(result_arr, result);
@@ -153,7 +153,7 @@ void test_special_values(void) {
     /* 1.0 to any power */
     base = _mm512_set1_ps(1.0f);
     for (uint32_t exp = 0; exp <= 100; exp += 10) {
-        __m512 result = powi_zmm_call(base, exp);
+        __m512 result = vpowips_call(base, exp);
         float res = _mm512_cvtss_f32(result);
         printf("  1.0^%u = %.3f - %s\n", exp, res, 
                fabsf(res - 1.0f) < 1e-5f ? "PASS" : "FAIL");
@@ -162,7 +162,7 @@ void test_special_values(void) {
 
 int main(void) {
     printf("======================================\n");
-    printf("  AVX-512 powi_zmm Test Harness\n");
+    printf("  AVX-512 vpowips Test Harness\n");
     printf("======================================\n");
     
     /* Run all test suites */

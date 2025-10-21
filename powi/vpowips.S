@@ -1,24 +1,28 @@
-// clang -c -mavx512f powi_zmm.S -o powi_zmm.o
+// clang -c -mavx512f vpowips.S -o vpowips.o
 
 .intel_syntax noprefix
 .section .text
-.global powi_zmm
+.global vpowips
 .align 16
 
-// __m512 powi_zmm(__m512 x, uint32_t e)
-//	input: ZMM0, ECX
-//	output ZMM0 <- ZMM0^ECX
-//	leaf function doesn't need SEH
+/*
+  Exponentiation by squaring w/ optimized special case filtering.
+  https://wikipedia.org/wiki/Exponentiation_by_squaring
+   + No memory access.
 
+__m512 vpowips(__m512 x, uint32_t e);
+	input: ZMM0, ECX
+	output ZMM0 <- ZMM0^ECX (per float element)
+*/
 
 // First, handle special cases: 0, 1 and powers of two:
 
 1:	vmulps zmm0, zmm0, zmm0
-powi_zmm:
+vpowips:
 	shr rcx, 1
 	ja 1b				// Y: ~Z & ~C
 
-// All trailing zero-bits are gone, only continue if more bits remain.
+// All trailing zero-bits are gone, only continue if set bits remain.
 
 	jz .done
 	vmovaps zmm1, zmm0
@@ -40,5 +44,3 @@ powi_zmm:
 //	vbroadcastss zmm0, xmm0
 	vpbroadcastd zmm0, ecx
 	retn
-
-// + No memory access.

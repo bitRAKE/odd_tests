@@ -1,11 +1,11 @@
-// clang++ -O3 -march=native -mavx512f -masm=intel timer.cpp powi_zmm.S -o timer.exe
+// clang++ -O3 -march=native -mavx512f -masm=intel timer.cpp vpowips.S -o timer.exe
 
 #include <iostream>
 #include <chrono>    // For high-precision timing
 #include <immintrin.h>
 #include <stdint.h>
 
-#include "powi_zmm_shim.h" // powi_zmm_call()
+#include "vpowips_shim.h" // vpowips_call()
 
 // This function "consumes" the result, preventing the compiler
 // from optimizing away the loop. It adds almost no overhead.
@@ -27,7 +27,7 @@ int main() {
     // This gets the CPU out of low-power states and warms up the
     // instruction and data caches.
     for (long long i = 0; i < WARMUP_ITER; ++i) {
-        result = powi_zmm_call(base, exponent);
+        result = vpowips_call(base, exponent);
         escape(&result); // "Use" the result
     }
 
@@ -35,7 +35,7 @@ int main() {
     auto start = std::chrono::high_resolution_clock::now();
 
     for (long long i = 0; i < TIMING_ITER; ++i) {
-        result = powi_zmm_call(base, exponent);
+        result = vpowips_call(base, exponent);
         // We must "use" the result in a way the compiler can't
         // optimize out. This tells the compiler the 'result'
         // is used by an asm block it can't understand.
