@@ -3,23 +3,23 @@
 .intel_syntax noprefix
 .section .text
 .global powi_zmm
+.align 16
 
 // __m512 powi_zmm(__m512 x, uint32_t e)
 //	input: ZMM0, ECX
 //	output ZMM0 <- ZMM0^ECX
 //	leaf function doesn't need SEH
 
-powi_zmm:
 
 // First, handle special cases: 0, 1 and powers of two:
 
-.reduce:
+1:	vmulps zmm0, zmm0, zmm0
+powi_zmm:
 	shr rcx, 1
-	jbe .first_bit // Y: Z|C
-	vmulps zmm0, zmm0, zmm0
-	jmp .reduce
+	ja 1b				// Y: ~Z & ~C
 
-.first_bit:
+// All trailing zero-bits are gone, only continue if more bits remain.
+
 	jz .done
 	vmovaps zmm1, zmm0
 
