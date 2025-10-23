@@ -10,9 +10,9 @@
   https://wikipedia.org/wiki/Exponentiation_by_squaring
    + No memory access.
 
-__m512 vpowips(__m512 x, uint32_t e);
-	input: ZMM0, ECX
-	output ZMM0 <- ZMM0^ECX (per float element)
+__m512 vpowips(__m512 x, uint64_t e);
+	input: ZMM0, RCX
+	output ZMM0 <- ZMM0^RCX (per float element)
 */
 
 // First, handle special cases: 0, 1 and powers of two:
@@ -38,9 +38,7 @@ vpowips:
 .not_zero:
 	retn
 
-.done:	jc .not_zero // perdict backward likely jump
-	mov ecx, 0x3f800000 // 1f
-//	movd xmm0, ecx
-//	vbroadcastss zmm0, xmm0
+.done:	jc .not_zero			// perdict backward likely jump
+	mov ecx, 0x3f800000		// 1f
 	vpbroadcastd zmm0, ecx
 	retn
