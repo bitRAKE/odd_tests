@@ -1,9 +1,23 @@
-// clang -c -mavx512f vpowups.S -o vpowups.o
+// Generate object file (with debug info):
+//	clang -c -g -mavx512f vpowups.S -o vpowups.o
+
+// Inspect generation:
+//	llvm-nm vpowups.o # symbol visibilities
+//	llvm-objdump --line-numbers --x86-asm-syntax=intel vpowups.o
+//	llvm-objdump -x -s -u vpowups.o
+//	llvm-readobj --coff-exports --symbols --sections vpowups.o
+//	llvm-readobj --codeview --symbols --sections vpowups.o
 
 .intel_syntax noprefix
-.section .text
+.section .text,"xr",discard,vpowups
 .global vpowups
-.align 16
+
+.cv_file 1 "vpowups.S"
+.cv_func_id 1
+.cv_loc 1 1 33 0 // func file line col
+
+.p2align 4		// align to 2^4 bytes
+.cfi_startproc		// unwindable and does not need anything
 
 /*
   Exponentiation by unsigned (squaring w/ optimized special case filtering).
@@ -16,34 +30,35 @@ __m512 vpowups(__m512 x, uint64_t e);
 	used:	ZMM1
 */
 
-// First, handle special cases: 0, 1 and powers of two:
+// Handle special cases: 0, 1 and powers of two:
 
-1:	vmulps zmm0, zmm0, zmm0
+0:	vmulps zmm0, zmm0, zmm0
 vpowups:
 	shr rcx, 1
-	ja 1b				// Y: ~Z & ~C, ~50%
+	ja 0b				// ~50%, Y: ~Z & ~C
 
 // All trailing zero-bits are gone, only continue if set bits remain:
 
-	jz .done			// Y: ~0%
+	jz 1f				// Y: ~0%
 	vmovaps zmm1, zmm0
 
-// Second, squaring loop taps at set bits to complete calculation:
+// Squaring loop accumulates at set bits to complete calculation:
 
-.square:
-	vmulps zmm1, zmm1, zmm1
+0:	vmulps zmm1, zmm1, zmm1
 	shr rcx, 1
-	jnc .square			// ~50%
+	jnc 0b				// ~50%
 	vmulps zmm0, zmm0, zmm1
-	jnz .square			// N: ~1%
-.not_zero:
-	retn
+	jnz 0b				// N: ~1%
+0:	retn
 
-.done:
-	jc .not_zero			// N: ~0%
-	mov ecx, 0x3f800000		// 1f
+// Powers of two are complete, but zero results in constant:
+
+1:	jc 0b				// N: ~0%
+	mov ecx, 0x3F800000		// 1f
 	vpbroadcastd zmm0, ecx
 	retn
 
 // Each branch comment refers to either if the branch is taken (Y[es]:), or if
 // the branch is not taken (N[o]:) -- including approximate branch percentages.
+
+.cfi_endproc
