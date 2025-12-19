@@ -292,31 +292,3 @@ section '.idata' import data readable writeable
            GdipSaveImageToFile,'GdipSaveImageToFile',\
            GdipGetImageEncodersSize,'GdipGetImageEncodersSize',\
            GdipGetImageEncoders,'GdipGetImageEncoders'
-
-; ### Explanation
-; 
-; 1. **Format PE GUI**: This directive tells `fasmg` (via the included macros) to construct a Windows Executable (Portable Executable format) for the Graphical User Interface subsystem (though we don't create a window, this allows GDI usage without a console popping up).
-; 2. **Config Data**: The `input_data` label points to the binary block you specified. The code parses this at runtime:
-; * `lodsd` instructions read the 32-bit integers (width, height, cols, rows) sequentially.
-; * The string data is accessed using a byte-pointer (`esi`) that increments as we draw characters.
-;
-;
-; 3. **GDI+ Pipeline**:
-; * 
-; **Startup**: Initializes the GDI+ library.
-; 
-; 
-; * **Bitmap**: Calculates the total image size (`CellWidth * Cols` by `CellHeight * Rows`) and creates a 24-bit RGB bitmap in memory.
-; * **Graphics Context**: Creates a drawing context (`Graphics`) associated with that bitmap.
-; * **Font**: Creates a "Consolas" font object. The size is approximated to fit the cell height.
-; * **Loop**: It iterates through your data rows and columns. For every character found, it defines a rectangle (`RectF`) corresponding to that grid cell's pixel coordinates and commands GDI+ to draw the text there.
-; 
-; 
-; 4. **PNG Encoding**:
-; * The `GetEncoderClsid` procedure searches the system's available encoders for one matching the mime type `image/png`.
-; * It retrieves the **CLSID** (Class ID) required by `GdipSaveImageToFile` to write the output correctly.
-; 
-; 
-; 5. **Output**: When you run the compiled executable, it will silently generate `output.png` in the same folder.
-; 
-; This approach combines the low-level data parsing of assembly with the high-level graphical capabilities of the Windows OS, satisfying the requirement to process your specific binary structure and output a standard image format.

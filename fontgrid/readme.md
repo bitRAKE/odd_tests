@@ -3,7 +3,7 @@
 
 # FontGrid Demonstration Program
 
-This program demonstrates how to use **flat assembler 2** (`fasm2`) to interface with the Windows GDI+ API. It parses a custom binary configuration block to render an aligned grid of text characters and saves the result as a PNG image.
+This program demonstrates how to use [**flat assembler 2** (`fasm2`)](https://github.com/tgrysztar/fasm2) to interface with the Windows GDI+ API. It parses a custom binary configuration block to render an aligned grid of text characters and saves the result as a PNG image.
 
 ## Overview
 
@@ -16,7 +16,7 @@ The application is a standalone Windows executable (PE/PE64) that performs the f
 
 ## Requirements
 
-* **Assembler**: `fasm2` (flat assembler 2).
+* **Assembler**: `fasm2` ([flat assembler 2](https://github.com/tgrysztar/fasm2)).
 * **Include Files**: Standard `win32a.inc` (for 32-bit) or `win64a.inc` (for 64-bit), typically found in the `fasmg`/`fasm2` include directories.
 * **Operating System**: Windows XP or later (requires GDI+).
 
