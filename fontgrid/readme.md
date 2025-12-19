@@ -34,7 +34,7 @@ config_data:
     db '456',0
     db '789',0
     db ' 0 ',0
-    db 0            ; Master terminator
+    db 0            ; terminator
 
 ```
 
@@ -53,13 +53,13 @@ fasm2 x86\fontgrid.asm
 ### 64-bit Version (`fontgrid64.asm`)
 
 ```bash
-fasm2 x64\fontgrid64.asm
+fasm2 x64\fontgrid.asm
 ```
 
 ## How to Run
 
 1. Compile the source code using the commands above.
-2. Run the resulting `fontgrid.exe` or `fontgrid64.exe`.
+2. Run the resulting `fontgrid.exe`.
 3. The program will run silently and terminate.
 4. Check the directory for the generated `output.png` file.
 
