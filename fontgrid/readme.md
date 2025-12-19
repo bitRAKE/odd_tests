@@ -50,7 +50,7 @@ config_data:
 fasm2 x86\fontgrid.asm
 ```
 
-### 64-bit Version (`fontgrid64.asm`)
+### 64-bit Version (`fontgrid.asm`)
 
 ```bash
 fasm2 x64\fontgrid.asm
