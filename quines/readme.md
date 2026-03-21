@@ -8,7 +8,7 @@
 | string patcher | 281 |
 
 ---
-Use the verification script to confirm results, or develop you technique:
+Use the verification script to confirm results, or develop your technique:
 ```
 _test 0.asm 1.asm 2.asm 3.asm
 ```

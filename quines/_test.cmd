@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion EnableExtensions
 
 if [%1] == [] (
   echo [USAGE] List of files expected.
@@ -7,35 +7,32 @@ if [%1] == [] (
 )
 
 :try
-if [%1] == [] (
-  goto end
-)
-
 if not exist "%1" (
-  echo [FAIL] File not found.
-  goto end
+  echo [FAIL] File not found. "%1"
+  goto :end
 )
 
 set "SOURCE=%1"
 set "OUTPUT=%1.temp"
 
-fasmg -v 2 -e 5 "%SOURCE%" "%OUTPUT%"
+fasmg -n -v 2 -e 5 "%SOURCE%" "%OUTPUT%"
 if errorlevel 1 (
-  echo [FAIL] Assembly failed.
+  echo [FAIL] Assembly failed. "%1"
   goto :end
 )
 
 fc /B "%SOURCE%" "%OUTPUT%" >nul
 if errorlevel 1 (
-  echo [FAIL] Differences found. Not a quine.
+  echo [FAIL] Differences found. Not a quine. "%1"
   REM	Don't remove output so user can debug.
+  goto :end
 ) else (
-  echo [SUCCESS] Perfect Quine! Source and Output match.
+  echo [SUCCESS] Perfect Quine^^^! Source and Output match in "%1"
   del "%OUTPUT%"
 )
 
-shift
-goto :try
+shift /1
+if [%1] NEQ [] goto :try
 
 :end
 endlocal
