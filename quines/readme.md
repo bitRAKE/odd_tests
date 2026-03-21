@@ -2,7 +2,7 @@
 ### fasmg Quines
  - \<empty file\>, zero bytes
  - `file __file__`, 13 bytes
- - "first a" and *last line*, 159 bytes
+ - "first a" and *last line*, 152 bytes
  - string patcher, 281 bytes
 
 

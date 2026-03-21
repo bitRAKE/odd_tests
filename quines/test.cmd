@@ -4,7 +4,7 @@ setlocal
 set "SOURCE=%1"
 set "OUTPUT=%1.temp"
 
-fasmg "%SOURCE%" "%OUTPUT%"
+fasmg -v 2 -e 5 "%SOURCE%" "%OUTPUT%"
 if errorlevel 1 (
   echo [FAIL] Assembly failed.
   goto :end

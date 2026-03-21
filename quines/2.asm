@@ -1,13 +1,13 @@
 a
 macro a
 calminstruction ?!n&
-match,n
-jyes x
 take m,m
+jno y
+emit 1,10
+y:
 arrange m,n
 stringify m
 emit lengthof m,m
-emit 1,10
 jno x
 assemble n
 x:
