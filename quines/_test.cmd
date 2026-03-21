@@ -1,6 +1,21 @@
 @echo off
 setlocal
 
+if [%1] == [] (
+  echo [USAGE] List of files expected.
+  goto end
+)
+
+:try
+if [%1] == [] (
+  goto end
+)
+
+if not exist "%1" (
+  echo [FAIL] File not found.
+  goto end
+)
+
 set "SOURCE=%1"
 set "OUTPUT=%1.temp"
 
@@ -18,6 +33,9 @@ if errorlevel 1 (
   echo [SUCCESS] Perfect Quine! Source and Output match.
   del "%OUTPUT%"
 )
+
+shift
+goto :try
 
 :end
 endlocal
