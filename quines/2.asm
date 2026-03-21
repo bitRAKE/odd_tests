@@ -1,14 +1,14 @@
 a
 macro a
 calminstruction ?!n&
-take m,m
-jno y
+take,b
+jno z
 emit 1,10
 assemble n
-y:
-arrange m,n
-stringify m
-emit lengthof m,m
+z:
+stringify n
+emit lengthof n,n
+take b,n
 end calminstruction
 a
 end macro

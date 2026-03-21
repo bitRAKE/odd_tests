@@ -4,7 +4,7 @@
 |--------|------|
 | \<empty file\> | zero |
 | `file __file__` | 13 |
-| *first/last a* | 143 |
+| *first/last a* | 138 |
 | string patcher | 281 |
 
 ---
