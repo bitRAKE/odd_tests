@@ -8,10 +8,10 @@
 #   - .cv_func_id / .cv_linetable -> removed
 #   - .seh_proc / .seh_endproc   -> .cfi_startproc / .cfi_endproc
 #   - .section .drectve ...      -> removed
-#   - .section .text$NAME,...    ->
-#         * default: ".text" (strip COMDAT)
+#   - .section .text$NAME,... or .section .text,...,discard,SYM ->
+#         * default: ".text" (strip COFF COMDAT/selection operands)
 #         * --elf-comdat=group: '.section .text.NAME,"axG",@progbits,SIG,comdat'
-#            SIG = associated symbol if present, else NAME
+#            SIG = associated symbol if present, else NAME/text
 #   - Optional: --strip-seh removes raw .xdata/.pdata sections
 #   - Optional: --map-rdata maps '.rdata' -> '.rodata'
 #
@@ -52,6 +52,17 @@ RX_TEXT_DOLLAR = re.compile(
     r'\s*"[^"]*"'                                # flags (ignored here)
     r'(?:\s*,\s*(?P<sel>[A-Za-z0-9_.$@]+))?'     # selection token (e.g., discard)
     r'(?:\s*,\s*(?P<assoc>[A-Za-z0-9_.$@]+))?'   # associated symbol (e.g., vpowups)
+    r'\s*$', re.IGNORECASE
+)
+
+# .section .text,"xr",discard,ASSOC
+# Clang may emit the base .text section with COFF selection metadata instead of
+# a .text$NAME subsection. Those extra operands are not valid in ELF GAS syntax.
+RX_TEXT_COFF_COMDAT = re.compile(
+    r'^\s*\.section\s+\.text\s*,'
+    r'\s*"[^"]*"'
+    r'\s*,\s*(?P<sel>[A-Za-z0-9_.$@]+)'
+    r'(?:\s*,\s*(?P<assoc>[A-Za-z0-9_.$@]+))?'
     r'\s*$', re.IGNORECASE
 )
 
@@ -130,6 +141,16 @@ def convert_lines(lines, *, strip_seh=False, map_rdata=False, elf_comdat='strip'
             if elf_comdat == 'group':
                 # GAS syntax: .section .text.NAME,"axG",@progbits,SIG,comdat
                 out.append(f'.section .text.{name},"axG",@progbits,{assoc},comdat')
+            else:
+                out.append('.text')
+            continue
+
+        # .section .text,"xr",discard,ASSOC -> strip COFF selection metadata.
+        m = RX_TEXT_COFF_COMDAT.match(raw)
+        if m:
+            assoc = m.group('assoc') or 'text'
+            if elf_comdat == 'group':
+                out.append(f'.section .text,"axG",@progbits,{assoc},comdat')
             else:
                 out.append('.text')
             continue
