@@ -117,7 +117,7 @@ public mainCRTStartup as 'mainCRTStartup' ; linker expects this default name
 
 .more_modules:	; load all modules into the session
 	lodsq
-✓	SymLoadModuleExW .hProcess,\
+	SymLoadModuleExW .hProcess,\
 		NULL,\		; no open file handle to image
 		rax,\		;name of image to load
 		rdx,\		; no module name - dbghelp will get it
@@ -125,7 +125,7 @@ public mainCRTStartup as 'mainCRTStartup' ; linker expects this default name
 		edx,\		; no module size - dbghelp will get it
 		rdx,\		; no special MODLOAD_DATA structure
 		edx		; flags
-	test eax, eax ; BOOL
+	test rax, rax ; DWORD64
 	jz .fail_GetLastError
 	cmp qword [rsi], 0
 	jnz .more_modules
